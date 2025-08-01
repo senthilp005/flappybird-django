@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flappy Bird Django Game</title>
+    <link rel="icon" href="{% static 'game/bird1.png' %}">
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        h1 { margin-top: 20px; }
+        canvas {
+            display: block;
+            margin: 10px auto;
+            background-color: #6dd5ed;
+        }
+        #restartBtn, .difficulty-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+        #gameOverText {
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            margin-top: 10px;
+        }
+        #scoreboard {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flappy Bird 🐦</h1>
+    <div id="scoreboard">
+        Score: <span id="scoreDisplay">0</span> &nbsp; Top Score: <span id="topScoreDisplay">0</span>
+    </div>
+    <div>
+        <label for="difficultySelect">Difficulty:</label>
+        <select id="difficultySelect">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+    </div>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <div id="gameOverText">💀 Game Over!</div>
+    <button id="restartBtn" onclick="restartGame()">Restart</button>
+
+    <!-- Audio & images -->
+     <audio id="background-music" src="{% static 'game/flappy barath1.mp3' %}"></audio>
+    <audio id="gameOverSound" src="{% static 'game/gameover barath1.mp3' %}"></audio>
+    <img id="birdImg" src="{% static 'game/bird barath1.png' %}" hidden>
+    <img id="bgImg" src="{% static 'game/background barath1.png' %}" hidden>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const birdImg = document.getElementById('birdImg');
+        const bgImg = document.getElementById('bgImg');
+        const gameOverSound = document.getElementById('gameOverSound');
+
+        let bird = { x: 50, y: 150, width: 34, height: 24, gravity: 1.5, velocity: 0 };
+        let pipes = [];
+        let score = 0;
+        let topScore = parseInt(localStorage.getItem("topScore") || "0", 10);
+        let gameOver = false;
+        let frames = 0;
+        let pipeSpeed = 3;
+        let gapSize = 100;
+
+        function updateDifficulty(level) {
+            if (level === 'easy') {
+                pipeSpeed = 2;
+                gapSize = 170;
+            } else if (level === 'medium') {
+                pipeSpeed = 3;
+                gapSize = 100;
+            } else if (level === 'hard') {
+                pipeSpeed = 4;
+                gapSize = 80;
+            }
+        }
+
+        document.getElementById('difficultySelect').addEventListener('change', (e) => {
+            updateDifficulty(e.target.value);
+        });
+
+        function draw() {
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+            for (let p of pipes) {
+                ctx.fillStyle = "#228B22";
+                ctx.fillRect(p.x, 0, 50, p.top);
+                ctx.fillRect(p.x, p.bottom, 50, canvas.height - p.bottom);
+            }
+
+            ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, 10, 25);
+            ctx.fillText("Top Score: " + topScore, 10, 50);
+
+            document.getElementById("scoreDisplay").textContent = score;
+            document.getElementById("topScoreDisplay").textContent = topScore;
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+
+            if (bird.y + bird.height > canvas.height || bird.y < 0) {
+                endGame();
+            }
+
+            for (let i = 0; i < pipes.length; i++) {
+                let p = pipes[i];
+                p.x -= pipeSpeed;
+
+                if (
+                    bird.x < p.x + 50 &&
+                    bird.x + bird.width > p.x &&
+                    (bird.y < p.top || bird.y + bird.height > p.bottom)
+                ) {
+                    endGame();
+                }
+
+                if (p.x + 50 < 0) {
+                    pipes.splice(i, 1);
+                    i--;
+                    score++;
+                    if (score > topScore) {
+                        topScore = score;
+                        localStorage.setItem("topScore", topScore);
+                    }
+                }
+            }
+
+            if (frames % 100 === 0) {
+                let top = Math.random() * (canvas.height / 2);
+                pipes.push({ x: canvas.width, top: top, bottom: top + gapSize });
+            }
+        }
+
+        function loop() {
+            draw();
+            update();
+            frames++;
+            if (!gameOver) {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        function jump() {
+            if (!gameOver) {
+                bird.velocity = -12;
+            }
+        }
+
+        function endGame() {
+            if (gameOver) return;
+            gameOver = true;
+            gameOverSound.currentTime = 0;
+            gameOverSound.play();
+            document.getElementById("gameOverText").style.display = "block";
+            document.getElementById("restartBtn").style.display = "inline-block";
+        }
+
+        function restartGame() {
+            bird.y = 150;
+            bird.velocity = 0;
+            pipes = [];
+            score = 0;
+            gameOver = false;
+            frames = 0;
+            document.getElementById("gameOverText").style.display = "none";
+            document.getElementById("restartBtn").style.display = "none";
+            loop();
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') jump();
+        });
+        document.addEventListener("click", jump);
+
+        // initial difficulty apply
+        updateDifficulty(document.getElementById('difficultySelect').value);
+        loop();
+    document.addEventListener('DOMContentLoaded', function () {
+  const bgMusic = document.getElementById('background-music');
+
+  // Enable loop
+  bgMusic.loop = true;
+
+  // Some browsers block autoplay without interaction, so:
+  function startMusicOnce() {
+    bgMusic.play().catch((e) => {
+      console.warn('Autoplay blocked. Waiting for user interaction.');
+    });
+    // Remove listener after first interaction
+    document.removeEventListener('click', startMusicOnce);
+  }
+
+  // Try to autoplay immediately (some browsers allow)
+  bgMusic.play().catch(() => {
+    // Wait for user click to start music
+    document.addEventListener('click', startMusicOnce);
+  });
+});
+
+    </script>
+</body>
+</html>
