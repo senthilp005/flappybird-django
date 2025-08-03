@@ -3,52 +3,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Flappy Bird</title>
-  <style>
-    body {
-      background-color: skyblue;
-      font-family: Arial, sans-serif;
-    }
-    #main {
-      width: 300px;
-      height: 500px;
-      background-color: lightcyan;
-      margin: 0 auto;
-      text-align: center;
-      position: relative;
-    }
-    #main img {
-      width: 40px;
-      position: absolute;
-      top: 100px;
-      left: 100px;
-    }
-  </style>
 </head>
 <body>
   <div id="main">
     <h2>Flappy<br>Bird</h2>
-    <img src="{% static 'game/images/bird1.png' %}" alt="bird">
+    <img src="{% static 'game/images/bird1.png' %}" alt="bird" />
     <p>Score: 0 | Top Score: 0</p>
-    <label>Difficulty:</label>
-    <select>
-      <option>Easy</option>
-      <option>Hard</option>
-    </select>
   </div>
 
+  <!-- Audio for flap and background -->
   <audio id="flapSound" src="{% static 'game/sounds/flappy1.mp3' %}" preload="auto"></audio>
   <audio id="bgSound" src="{% static 'game/sounds/background.mp3' %}" preload="auto" loop></audio>
 
   <script>
-    const bgSound = document.getElementById('bgSound');
-    try {
-      bgSound.volume = 0.3;
-    } catch (err) {
-      console.error("Audio volume error:", err);
-    }
-    bgSound.play();
+    // Play background sound when clicked
+    document.addEventListener("click", () => {
+      document.getElementById("bgSound").play();
+    });
   </script>
 </body>
 </html>
