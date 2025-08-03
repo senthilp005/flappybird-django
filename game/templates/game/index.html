@@ -59,11 +59,12 @@
       <button id="restartBtn" onclick="restartGame()" style="display: none;">Restart</button>
     </section>
 
-    <!-- Preload assets -->
-    <img id="birdImg" src="{% static 'game/images/bird1.png' %}" alt="bird" hidden>
-    <img id="bgImg" src="{% static 'game/images/background1.png' %}" alt="background" hidden>
-    <audio id="gameOverSound" src="{% static 'game/sounds/flappy1.mp3' %}" preload="auto"></audio>
-    <audio id="background-music" src="{% static 'game/sounds/bg_music.mp3' %}" preload="auto" loop></audio>
+   <img id="birdImg" src="{% static 'game/images/bird1.png' %}" alt="failed" />
+<img id="bgImg" src="{% static 'game/images/background1.png' %}"  alt="failed"/>
+<audio id="flapSound" src="{% static 'game/sounds/flappy1.mp3' %}"></audio>
+<audio id="gameOverSound" src="{% static 'game/sounds/flappy1.mp3' %}"></audio>
+<audio id="background-music" src="{% static 'game/sounds/background1.mp3' %}"></audio>
+
   </main>
 
   <footer>
