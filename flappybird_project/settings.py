@@ -11,7 +11,6 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1', '.up.railway.app']
 
-
 # ✅ Support Render external hostname
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -19,8 +18,10 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 # Static and media files
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Must be present
-  # If using /static/ inside app
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Required for collectstatic
+
+# ✅ ADD THIS LINE to include app-level static files
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'game/static')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -35,14 +36,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',  # ✅ REQUIRED!
     'django.contrib.staticfiles',
-    'game'
-    # your apps like 'game', etc.
+    'game'  # your app
 ]
 
 # Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # For serving static files in production
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ for static file serving
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -94,6 +94,7 @@ USE_TZ = True
 # Primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ✅ Enforce HTTPS in production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
