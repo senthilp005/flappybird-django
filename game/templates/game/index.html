@@ -1,176 +1,195 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Flappy Bird Game</title>
-    <style>
-        body {
-            text-align: center;
-            background-color: #dff6f0;
-            font-family: Arial, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Bird Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #dff6f0;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
 
-        canvas {
-            border: 2px solid #000;
-            background-color: #8be9fd;
-        }
+    header {
+      background-color: #e0f7fa;
+      padding: 20px;
+    }
 
-        #gameOverText {
-            font-size: 24px;
-            color: red;
-        }
-    </style>
+    canvas {
+      border: 2px solid #000;
+      background-color: #8be9fd;
+      margin-top: 10px;
+    }
+
+    #scoreboard {
+      margin: 10px 0;
+    }
+
+    #gameOverText {
+      font-size: 24px;
+      color: red;
+      margin: 10px;
+    }
+  </style>
 </head>
 <body>
+  <header>
     <h1>Flappy Bird <img src="{% static 'game/images/bird1.png' %}" alt="bird" height="40"></h1>
+  </header>
 
-    <div>
-        <p>Score: <span id="score">0</span> &nbsp; Top Score: <span id="topScore">0</span></p>
-        <label for="difficulty">Difficulty:</label>
-        <select id="difficulty">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-        </select>
-    </div>
+  <main>
+    <section id="scoreboard">
+      <p>Score: <span id="score">0</span> &nbsp; | &nbsp; Top Score: <span id="topScore">0</span></p>
+      <label for="difficulty">Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </section>
 
     <canvas id="gameCanvas" width="320" height="480"></canvas>
 
-    <div id="gameOverText" style="display: none;">💀 Game Over!</div>
-    <button id="restartBtn" onclick="restartGame()" style="display: none;">Restart</button>
+    <section>
+      <div id="gameOverText" style="display: none;">💀 Game Over!</div>
+      <button id="restartBtn" onclick="restartGame()" style="display: none;">Restart</button>
+    </section>
 
-    <!-- Hidden image/audio elements for asset loading -->
-    <img id="birdImg" src="{% static 'game/images/bird1.png' %}" hidden>
-    <img id="bgImg" src="{% static 'game/images/background1.png' %}" hidden>
-    <audio id="flapSound" src="{% static 'game/sounds/flappy1.mp3' %}"></audio>
-    <audio id="gameOverSound" src="{% static 'game/sounds/gameover1.mp3' %}"></audio>
-    <audio id="background-music" src="{% static 'game/sounds/bg_music.mp3' %}"></audio>
+    <!-- Preload assets -->
+    <img id="birdImg" src="{% static 'game/images/bird1.png' %}" alt="bird" hidden>
+    <img id="bgImg" src="{% static 'game/images/background1.png' %}" alt="background" hidden>
+    <audio id="gameOverSound" src="{% static 'game/sounds/flappy1.mp3' %}" preload="auto"></audio>
+    <audio id="background-music" src="{% static 'game/sounds/bg_music.mp3' %}" preload="auto" loop></audio>
+  </main>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const context = canvas.getContext("2d");
+  <footer>
+    <p>&copy; 2025 Flappy Bird Django</p>
+  </footer>
 
-        const birdImg = document.getElementById("birdImg");
-        const bgImg = document.getElementById("bgImg");
-        const flapSound = document.getElementById("flapSound");
-        const gameOverSound = document.getElementById("gameOverSound");
-        const bgMusic = document.getElementById("background-music");
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const context = canvas.getContext("2d");
 
-        let bird = {
-            x: 50,
-            y: 150,
-            width: 30,
-            height: 30,
-            velocity: 0,
-            gravity: 1.5
-        };
+    const birdImg = document.getElementById("birdImg");
+    const bgImg = document.getElementById("bgImg");
+    const flapSound = document.getElementById("flapSound");
+    const gameOverSound = document.getElementById("gameOverSound");
+    const bgMusic = document.getElementById("background-music");
 
-        let pipes = [];
-        let score = 0;
-        let topScore = 0;
-        let gameOver = false;
-        let gap = 100;
+    let bird = {
+      x: 50,
+      y: 150,
+      width: 30,
+      height: 30,
+      velocity: 0,
+      gravity: 1.5
+    };
 
-        document.addEventListener("keydown", jump);
-        document.getElementById("difficulty").addEventListener("change", setDifficulty);
+    let pipes = [];
+    let score = 0;
+    let topScore = 0;
+    let gameOver = false;
+    let gap = 100;
 
-        function jump() {
-            if (!gameOver) {
-                bird.velocity = -12;
-                flapSound.currentTime = 0;
-                flapSound.play();
-            }
+    document.addEventListener("keydown", jump);
+    document.getElementById("difficulty").addEventListener("change", setDifficulty);
+
+    function jump() {
+      if (!gameOver) {
+        bird.velocity = -12;
+        flapSound.currentTime = 0;
+        flapSound.play();
+      }
+    }
+
+    function setDifficulty() {
+      const level = document.getElementById("difficulty").value;
+      gap = level === "easy" ? 120 : level === "medium" ? 100 : 80;
+    }
+
+    function restartGame() {
+      bird.y = 150;
+      bird.velocity = 0;
+      pipes = [];
+      score = 0;
+      gameOver = false;
+      document.getElementById("gameOverText").style.display = "none";
+      document.getElementById("restartBtn").style.display = "none";
+      bgMusic.currentTime = 0;
+      bgMusic.play();
+      loop();
+    }
+
+    function endGame() {
+      if (gameOver) return;
+      gameOver = true;
+      gameOverSound.currentTime = 0;
+      gameOverSound.play();
+      bgMusic.pause();
+      document.getElementById("gameOverText").style.display = "block";
+      document.getElementById("restartBtn").style.display = "inline-block";
+    }
+
+    function loop() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+      bird.velocity += bird.gravity;
+      bird.y += bird.velocity;
+
+      context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+      if (pipes.length === 0 || pipes[pipes.length - 1].x < 200) {
+        let pipeY = Math.floor(Math.random() * (canvas.height - gap - 100)) + 50;
+        pipes.push({ x: canvas.width, y: pipeY });
+      }
+
+      for (let i = 0; i < pipes.length; i++) {
+        let pipe = pipes[i];
+        pipe.x -= 2;
+
+        context.fillStyle = "#228B22";
+        context.fillRect(pipe.x, 0, 50, pipe.y);
+        context.fillRect(pipe.x, pipe.y + gap, 50, canvas.height - pipe.y - gap);
+
+        if (
+          bird.x + bird.width > pipe.x &&
+          bird.x < pipe.x + 50 &&
+          (bird.y < pipe.y || bird.y + bird.height > pipe.y + gap)
+        ) {
+          endGame();
         }
 
-        function setDifficulty() {
-            const difficulty = document.getElementById("difficulty").value;
-            gap = difficulty === "easy" ? 170 : difficulty === "medium" ? 100 : 80;
+        if (pipe.x + 50 < 0) {
+          pipes.splice(i, 1);
+          i--;
+          score++;
+          if (score > topScore) topScore = score;
         }
+      }
 
-        function restartGame() {
-            bird.y = 150;
-            bird.velocity = 0;
-            pipes = [];
-            score = 0;
-            gameOver = false;
-            document.getElementById("gameOverText").style.display = "none";
-            document.getElementById("restartBtn").style.display = "none";
-            bgMusic.currentTime = 0;
-            bgMusic.play();
-        }
+      if (bird.y + bird.height > canvas.height || bird.y < 0) {
+        endGame();
+      }
 
-        function endGame() {
-            if (gameOver) return;
-            gameOver = true;
-            gameOverSound.currentTime = 0;
-            gameOverSound.play();
-            bgMusic.pause();
-            document.getElementById("gameOverText").style.display = "block";
-            document.getElementById("restartBtn").style.display = "inline-block";
-        }
+      document.getElementById("score").innerText = score;
+      document.getElementById("topScore").innerText = topScore;
 
-        function loop() {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      if (!gameOver) {
+        requestAnimationFrame(loop);
+      }
+    }
 
-            bird.velocity += bird.gravity;
-            bird.y += bird.velocity;
-
-            context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
-
-            if (pipes.length === 0 || pipes[pipes.length - 1].x < 200) {
-                let pipeY = Math.floor(Math.random() * (canvas.height - gap - 100)) + 50;
-                pipes.push({
-                    x: canvas.width,
-                    y: pipeY
-                });
-            }
-
-            for (let i = 0; i < pipes.length; i++) {
-                let pipe = pipes[i];
-                pipe.x -= 2;
-
-                context.fillStyle = "#228B22";
-                context.fillRect(pipe.x, 0, 50, pipe.y);
-                context.fillRect(pipe.x, pipe.y + gap, 50, canvas.height - pipe.y - gap);
-
-                if (
-                    bird.x + bird.width > pipe.x &&
-                    bird.x < pipe.x + 50 &&
-                    (bird.y < pipe.y || bird.y + bird.height > pipe.y + gap)
-                ) {
-                    endGame();
-                }
-
-                if (pipe.x + 50 < 0) {
-                    pipes.splice(i, 1);
-                    i--;
-                    score++;
-                    if (score > topScore) topScore = score;
-                }
-            }
-
-            if (bird.y + bird.height > canvas.height || bird.y < 0) {
-                endGame();
-            }
-
-            document.getElementById("score").innerText = score;
-            document.getElementById("topScore").innerText = topScore;
-
-            if (!gameOver) {
-                requestAnimationFrame(loop);
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            bgMusic.loop = true;
-            bgMusic.volume = 0.4;
-            bgMusic.play();
-            setDifficulty();
-            loop();
-        });
-    </script>
+    document.addEventListener("DOMContentLoaded", () => {
+      bgMusic.volume = 0.4;
+      bgMusic.play();
+      setDifficulty();
+      loop();
+    });
+  </script>
 </body>
 </html>
