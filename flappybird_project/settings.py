@@ -20,7 +20,6 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Static and media files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Must be present
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'game/static')]
   # If using /static/ inside app
 
 MEDIA_URL = '/media/'
