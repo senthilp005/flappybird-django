@@ -4,23 +4,76 @@
 <head>
   <meta charset="UTF-8" />
   <title>Flappy Bird</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ccf2ff;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+    }
+    #game-container {
+      text-align: center;
+      padding: 20px;
+    }
+    canvas {
+      border: 2px solid black;
+      background: url("{% static 'game/images/background1.png' %}") no-repeat;
+      background-size: cover;
+    }
+  </style>
 </head>
 <body>
-  <div id="main">
-    <h2>Flappy<br>Bird</h2>
-    <img src="{% static 'game/images/bird1.png' %}" alt="bird" />
-    <p>Score: 0 | Top Score: 0</p>
+  <div id="game-container">
+    <h1>Flappy Bird</h1>
+    <img src="{% static 'game/images/bird1.png' %}" alt="bird" width="50" />
+    <p>Score: <span id="score">0</span> | Top Score: <span id="topScore">0</span></p>
+
+    <label for="difficulty">Difficulty:</label>
+    <select id="difficulty">
+      <option>Easy</option>
+      <option>Medium</option>
+      <option>Hard</option>
+    </select>
+    <button onclick="restartGame()">Start Game</button>
+
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
   </div>
 
-  <!-- Audio for flap and background -->
-  <audio id="flapSound" src="game/static/game/images/background1.png" preload="auto"></audio>
-  <audio id="bgSound" src="game/static/game/sounds/background1.mp3" preload="auto" loop></audio>
+  <!-- Audio -->
+  <audio id="bgMusic" loop>
+    <source src="{% static 'game/sounds/background1.mp3' %}" type="audio/mpeg" />
+  </audio>
+  <audio id="flapSound">
+    <source src="{% static 'game/sounds/flappy1.mp3' %}" type="audio/mpeg" />
+  </audio>
 
+  <!-- Script -->
   <script>
-    // Play background sound when clicked
-    document.addEventListener("click", () => {
-      document.getElementById("bgSound").play();
+    document.addEventListener("DOMContentLoaded", function () {
+      const bgMusic = document.getElementById("bgMusic");
+      bgMusic.volume = 0.4;
+
+      // Only play music after user interaction (required by browsers)
+      document.body.addEventListener("click", () => {
+        if (bgMusic.paused) bgMusic.play().catch(() => {});
+      }, { once: true });
+
+      // Set difficulty logic
+      function setDifficulty() {
+        const difficulty = document.getElementById("difficulty").value;
+        console.log("Difficulty set to:", difficulty);
+        // Your game logic...
+      }
+
+      document.getElementById("difficulty").addEventListener("change", setDifficulty);
     });
+
+    function restartGame() {
+      console.log("Game restarting...");
+      // Your restart logic...
+    }
   </script>
 </body>
 </html>
